@@ -21,7 +21,7 @@ class ModuleHelper
 
     public static function getAllowedEmailDomains(){
         $emailDomains = ['musoni.co.ke'];
-        $envDomains = env('AUTHORIZATION_EMAIL_DOMAINS');
+        $envDomains = env('AUTHENTICATION_EMAIL_DOMAINS_ALLOWED');
 
         if (isset($envDomains)){
             return [$envDomains];

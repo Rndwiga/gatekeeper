@@ -47,8 +47,8 @@ class LoginController extends Controller
 
     private function loginType(){
 
-        if (!is_null(config('authorization.settings.password_less_login'))){
-            if (config('authorization.settings.password_less_login') == true){
+        if (!is_null(env('AUTHENTICATION_PASSWORD_LESS_LOGIN'))){
+            if (env('AUTHENTICATION_PASSWORD_LESS_LOGIN') == true){
                 return config('authorization.views.pages.auth.passwordless.login');
             }else{
 

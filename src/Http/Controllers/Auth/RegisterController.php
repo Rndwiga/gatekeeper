@@ -45,8 +45,8 @@ class RegisterController extends Controller
 
     private function registrationType(){
 
-        if (!is_null(config('authorization.settings.password_less_registration'))){
-            if (config('authorization.settings.password_less_registration') == true){
+        if (!is_null(env('AUTHENTICATION_PASSWORD_LESS_REGISTRATION'))){
+            if (env('AUTHENTICATION_PASSWORD_LESS_REGISTRATION') == true){
                 return config('authorization.views.pages.auth.passwordless.register');
             }else{
 
@@ -76,10 +76,10 @@ class RegisterController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);*/
 
-        $envMessage = env('AUTHORIZATION_MESSAGE');
+        $envMessage = env('AUTHENTICATION_AUTHORIZATION_MESSAGE');
 
         $messages = [
-            'email.email_domain_allowed' => isset($envMessage)? env('AUTHORIZATION_MESSAGE') : 'The :attribute should be a Musoni email.', //setting custom message
+            'email.email_domain_allowed' => isset($envMessage)? env('AUTHENTICATION_AUTHORIZATION_MESSAGE') : 'The :attribute should be the company email.', //setting custom message
         ];
         return Validator::make($data, [
             'name' => 'required|string|max:255',
