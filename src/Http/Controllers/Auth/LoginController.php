@@ -162,7 +162,7 @@ class LoginController extends Controller
 
         Auth::login($emailLogin->user);
 
-        return redirect('home');
+        return redirect()->route(env('BASE_DASHBOARD_ROUTE'));
     }
 
 }

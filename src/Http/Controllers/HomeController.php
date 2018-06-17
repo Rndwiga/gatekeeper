@@ -2,11 +2,10 @@
 
 namespace Rndwiga\Authentication\Http\Controllers;
 
-use ConsoleTVs\Charts\Facades\Charts;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Musoni\Cashflow\Models\Cashflow;
+
 
 class HomeController extends Controller
 {

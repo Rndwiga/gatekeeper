@@ -106,7 +106,9 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        $this->validator($request->all())->validate();
+      // return $request->all();
+
+       // $this->validator($request->all())->validate();
 
         event(new Registered($user = $this->create($request->all())));
 
@@ -143,8 +145,8 @@ class RegisterController extends Controller
         $content = $url;
         Mail::raw($content, function ($message)  use ($request){
             $message->to($request->input('email'));
-            $message->subject('MMT Login');
-            $message->from(env('MAIL_USERNAME'), 'MMT Application');
+            $message->subject('Login Notice');
+            $message->from(env('MAIL_USERNAME'), 'Application');
         });
 
 
