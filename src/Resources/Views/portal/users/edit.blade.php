@@ -1,8 +1,7 @@
-@extends(config('cashflow.views.layouts.admin'))
+@extends(config('gentella.views.layouts.admin'))
 
 @section('content')
 <!-- page content -->
-<div class="right_col" role="main">
   <div class="">
     <div class="page-title">
       <div class="title_left">
@@ -11,7 +10,7 @@
     </div>
     <div class="row">
       <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <a href="{{url('admin/users')}}" class="btn btn-default">Back</a>
+        <a href="{{route('users.index')}}" class="btn btn-default">Back</a>
       </div>
     </div>
     <div class="clearfix"></div>
@@ -19,7 +18,7 @@
       <div class="col-md-12 col-sm-12 col-xs-12">
         <div class="x_panel">
           <div class="x_title">
-            <h2>Cashflow User <small>the user can log into this dashboard</small></h2>
+            <h2>Create User <small>the user can log into this dashboard</small></h2>
             <ul class="nav navbar-right panel_toolbox">
               <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
               </li>
@@ -33,12 +32,20 @@
           </div>
           <div class="x_content">
             <br />
-              {!! Form::model($user, ['action' => ['UserController@update', $user->id], 'method' => 'patch', 'class'=> 'form-horizontal form-label-left', 'files' => true ]) !!}
+              {!! Form::model($user,['route' => ['users.update',$user->id], 'method' => 'put', 'class'=> 'form-horizontal form-label-left' , 'files' => true ]) !!}
+
               <div class="form-group">
-                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Full Name <span class="required">*</span>
+                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">First Name <span class="required">*</span>
                 </label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
-                  {{ Form::text('name', null, ['required'=> 'required', 'class' => 'form-control col-md-7 col-xs-12']) }}
+                  {{ Form::text('first_name', null, ['required'=> 'required', 'class' => 'form-control col-md-7 col-xs-12']) }}
+                </div>
+              </div>
+            <div class="form-group">
+                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Last Name <span class="required">*</span>
+                </label>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                  {{ Form::text('last_name', null, ['required'=> 'required', 'class' => 'form-control col-md-7 col-xs-12']) }}
                 </div>
               </div>
               <div class="form-group">
@@ -48,37 +55,32 @@
                   {{ Form::email('email', null, ['required'=> 'required', 'class' => 'form-control col-md-7 col-xs-12']) }}
                 </div>
               </div>
-              <div class="form-group">
+            <div class="form-group">
+                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">Password <span class="required">*</span>
+                </label>
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                  {{ Form::password('password', null, ['required'=> 'required', 'class' => 'form-control col-md-7 col-xs-12']) }}
+                </div>
+              </div>
+              {{--<div class="form-group">
                 <label for="middle-name" class="control-label col-md-3 col-sm-3 col-xs-12">Office</label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
-                  {{ Form::select('office_id', ['' => 'Select'] + $offices , null, ['class' => 'form-control col-md-7 col-xs-12']) }}
+                 --}}{{-- {{ Form::select('office_id', ['' => 'Select'] + $offices , null, ['class' => 'form-control col-md-7 col-xs-12']) }}--}}{{--
                 </div>
-              </div>
-              <div class="form-group">
+              </div>--}}
+              {{--<div class="form-group">
                 <label for="middle-name" class="control-label col-md-3 col-sm-3 col-xs-12">Role</label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
-                  {{ Form::select('role_id', ['' => 'Select'] + $roles , null, ['class' => 'form-control col-md-7 col-xs-12']) }}
+                  {{ Form::select('role_id', array(1 => 'User', 0 => 'Admin') , null, ['class' => 'form-control col-md-7 col-xs-12']) }}
                 </div>
-              </div>
+              </div>--}}
               <div class="form-group">
                 <label for="middle-name" class="control-label col-md-3 col-sm-3 col-xs-12">Status</label>
                 <div class="col-md-6 col-sm-6 col-xs-12">
-                  {{ Form::select('is_active', array(1 => 'Activate', 0 => 'Deactivated'), null, ['class' => 'form-control col-md-7 col-xs-12']) }}
+                  {{ Form::select('user_status', array(1 => 'Active', 0 => 'Deactivate'), 0, ['class' => 'form-control col-md-7 col-xs-12']) }}
                 </div>
               </div>
-{{--            <div class="form-group">
-                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Password</label>
-                  <div class="col-md-6 col-sm-6 col-xs-12">
-                    {{ Form::password('password', ['class' => 'form-control col-md-7 col-xs-12']) }}
-                  </div>
-              </div>
-              <div class="form-group">
-                  <label class="control-label col-md-3 col-sm-3 col-xs-12">Confirm Password</label>
-                  <div class="col-md-6 col-sm-6 col-xs-12">
-                      {{ Form::text('password_confirmation', null, ['class' => 'form-control col-md-7 col-xs-12']) }}
-                  </div>
-              </div>
---}}
+
 
               <div class="ln_solid"></div>
               <div class="form-group">
@@ -94,6 +96,5 @@
       </div>
     </div>
     </div>
-  </div>
-</div>
+
 @endsection

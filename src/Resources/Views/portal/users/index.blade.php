@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- page content -->
-<div class="right_col" role="main">
+
   <div class="">
     <div class="page-title">
       <div class="title_left">
@@ -11,7 +11,7 @@
     </div>
     <div class="row">
       <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <a href="{{url('admin/users/create')}}" class="btn btn-success">Create User</a>
+        <a href="{{route('users.create')}}" class="btn btn-success">Create User</a>
       </div>
     </div>
 
@@ -26,7 +26,7 @@
                   <th>First Name</th>
                   <th>Last Name</th>
                   <th>Email</th>
-                  <th>Office</th>
+                  {{--<th>Office</th>--}}
                   <th>Status</th>
                   <th>Role</th>
                   <th>Created</th>
@@ -38,26 +38,31 @@
             @if(isset($users))
               @foreach($users as $user)
                 <tr>
-                  <td>{{$user->name}}</td>
-                  <td>{{$user->name}}</td>
+                  <td>{{$user->first_name}}</td>
+                  <td>{{$user->last_name}}</td>
                   <td>{{$user->email}}</td>
-                  <td>{{$user->office->name}}</td>
-                  <td>{{$user->is_active == 1 ? 'Active' : 'Deactivated'}}</td>
+                  {{--<td>{{$user->office->name}}</td>--}}
+                  <td>{{$user->user_status == 1 ? 'Active' : 'Deactivated'}}</td>
                   <td>{{--{{$user->role->name}}--}}</td>
-                  <td>{{$user->created_at->diffForhumans()}}</td>
+                  <td>{{$user->created_at}}</td>
                   <td>
                     <div class="col-md-12 col-sm-12 col-xs-12">
                         <div class='pull-left'>
                             <a href="{{url('admin/users/'. $user->id .'/edit')}}" class="btn btn-success" ><i class="fa fa-pencil"></i></a>
-
-                            <a href="#" class="btn btn-danger" ><i class="fa fa-trash"></i></a>
                         </div>
-                        <div class='pull-right'>
+                      @if(\Illuminate\Support\Facades\Auth::user()->id == 4 || \Illuminate\Support\Facades\Auth::user()->id == 1)
+                      <div class='pull-right'>
+                          {!! Form::open(['route' => ['users.destroy',$user->id], 'method' => 'delete']) !!}
+                            <button type="submit" class="btn bg-danger"><i class="fa fa-trash"></i></button>
+                          {!! Form::close() !!}
+                       </div>
+                      @endif
+                      <div class='pull-right'>
                           {!! Form::open(['url' => 'password/email', 'method' => 'post']) !!}
                             <input type="hidden" class="form-control" name="email" value="{{$user->email}}">
                             <button type="submit" class="btn bg-warning"><i class="fa fa-refresh"></i></button>
                           {!! Form::close() !!}
-                        </div>
+                       </div>
                     </div>
                   </td>
                 </tr>
@@ -69,6 +74,6 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
+
+
 @endsection
