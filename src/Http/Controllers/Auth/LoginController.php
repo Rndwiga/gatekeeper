@@ -143,8 +143,8 @@ class LoginController extends Controller
         $content = $url;
         Mail::raw($content, function ($message)  use ($request){
             $message->to($request->input('email'));
-            $message->subject('MMT Login');
-            $message->from(env('MAIL_USERNAME'), 'MMT Application');
+            $message->subject(env('APP_NAME').' Login Token');
+            $message->from(env('MAIL_USERNAME'), env('APP_NAME'));
         });
 
 
