@@ -11,6 +11,21 @@ class ModuleHelper
         return __DIR__.'/Routes/api.php';
     }
 
+    public static function getPublicRoutes(){
+        $public =  __DIR__.'/Routes/Api/';
+        if (is_dir($public)){
+            $scanned_directory = array_diff(scandir($public), array('..', '.'));
+            $routeFiles = [];
+            array_walk($scanned_directory,function ($scannedFile) use (&$routeFiles,&$public){
+
+                $routeFiles[] = $public.$scannedFile;
+            });
+
+            return $routeFiles;
+        }
+        return false;
+    }
+
     public static function getConfig(){
         return __DIR__.'/Config/authorization.php';
     }

@@ -27,17 +27,13 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    public function routeNotificationForSlack()
+    public function generateToken()
     {
-        //  return $this->slack_webhook_url; //use this if you have slack_webhook_url
-        //in database
-        $webhookURL = 'https://musonikenya.slack.com/services/hooks/slackbot?token=wzk12tgwgBsAAHUIibDTUJ48&channel=cashflow-nofication';
-      //  $webhookURL = 'https://musonikenya.slack.com/services/hooks/slackbot?token=wzk12tgwgBsAAHUIibDTUJ48';
-        return $webhookURL;
+        $this->api_token = str_random(60);
+        $this->save();
+
+        return $this->api_token;
     }
 
-    public function office()
-      {
-        return $this->belongsTo(Office::class);
-      }
+
 }

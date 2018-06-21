@@ -4,6 +4,13 @@
     "description": "Authentication package for laravel projects.",
     "keywords": ["ui", "rndwiga",  "admin", "tyondo", "laravel"],
     "homepage": "https://github.com/Rndwiga/",
+    "repositories": [
+        {
+            "type": "git",
+            "reference":"master",
+            "url": "https://github.com/Rndwiga/laravel-authentication.git"
+        }
+    ],
     "authors": [
         {
             "name": "Raphael Ndwiga",

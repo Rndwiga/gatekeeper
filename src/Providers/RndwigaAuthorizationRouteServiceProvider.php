@@ -40,7 +40,7 @@ class RndwigaAuthorizationRouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        //
+        $this->loadPublicRoutes();
     }
 
     /**
@@ -70,5 +70,20 @@ class RndwigaAuthorizationRouteServiceProvider extends ServiceProvider
              ->middleware('api')
              ->namespace($this->namespace)
              ->group(ModuleHelper::getApiRoutes());
+    }
+
+    protected function loadPublicRoutes(){
+        $publicRoutes = ModuleHelper::getPublicRoutes();
+        if ($publicRoutes){
+            foreach ($publicRoutes as $key => $route) {
+
+                if (file_exists($route)){
+                    Route::prefix('api')
+                        ->middleware('api')
+                        ->namespace($this->namespace)
+                        ->group($route);
+                }
+            }
+        }
     }
 }
