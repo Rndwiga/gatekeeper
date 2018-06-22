@@ -22,8 +22,17 @@ class LoginController extends ApiController
      *
      * @return \Illuminate\Http\Response
      */
-    public function login(LoginRequest $request)
+    public function login(Request $request)
     {
+        $validator = Validator::make($request->toArray(),[
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ]);
+        if (! $validator->passes()) {
+            //TODO Handle your error
+            return $validator->errors()->jsonSerialize();
+        }
+
         $user = User::where('email',$request->input('email'))->first();
 
         if (!is_null($user)){

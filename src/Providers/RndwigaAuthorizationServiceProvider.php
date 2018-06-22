@@ -2,9 +2,12 @@
 
 namespace Rndwiga\Authentication\Providers;
 
+use Illuminate\Routing\Router;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
+use Rndwiga\Authentication\Api\Http\Middleware\ApiAuthenticationMiddleware;
+use Rndwiga\Authentication\Api\Http\Middleware\ApiHeaderMiddleware;
 use Rndwiga\Authentication\ModuleHelper;
 
 class RndwigaAuthorizationServiceProvider extends ServiceProvider
@@ -20,12 +23,17 @@ class RndwigaAuthorizationServiceProvider extends ServiceProvider
         //'Charts' => Charts::class,
     ];
 
+    protected $middleware = [
+        'apiAuthentication' => ApiAuthenticationMiddleware::class,
+        'apiHeader' => ApiHeaderMiddleware::class,
+    ];
+
     /**
      * Bootstrap the application services.
      *
      * @return void
      */
-    public function boot()
+    public function boot(Router $router)
     {
         $this->loadViewsFrom(ModuleHelper::getViews(), self::$packageName);
 
@@ -37,6 +45,8 @@ class RndwigaAuthorizationServiceProvider extends ServiceProvider
                         return '@' . $domain;
                     })->all());
         });
+
+        $this->bootMiddleware($router);
     }
 
     /**
@@ -72,5 +82,21 @@ class RndwigaAuthorizationServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             ModuleHelper::getConfig(), self::$packageName
         );
+    }
+
+    private function bootMiddleware($router)
+    {
+        if (app()->version() >= 5.4) {
+            foreach ($this->middleware as $key => $alias)
+            {
+                $router->aliasMiddleware($key, $alias);
+            }
+        } else {
+            foreach ($this->middleware as $key => $alias)
+            {
+                $router->middleware($key, $alias);
+            }
+        }
+
     }
 }

@@ -16,6 +16,7 @@ class RndwigaAuthorizationRouteServiceProvider extends ServiceProvider
      * @var string
      */
     protected $namespace = 'Rndwiga\Authentication\Http\Controllers';
+    protected $namespaceApi = 'Rndwiga\Authentication\Api\Http\Controllers';
 
     /**
      * Define your route model bindings, pattern filters, etc.
@@ -36,11 +37,12 @@ class RndwigaAuthorizationRouteServiceProvider extends ServiceProvider
      */
     public function map()
     {
-        $this->mapApiRoutes();
+       // $this->mapApiRoutes();
 
-        $this->mapWebRoutes();
+       // $this->mapWebRoutes();
 
-        $this->loadPublicRoutes();
+        $this->loadApiRoutes();
+        $this->loadWebRoutes();
     }
 
     /**
@@ -72,15 +74,31 @@ class RndwigaAuthorizationRouteServiceProvider extends ServiceProvider
              ->group(ModuleHelper::getApiRoutes());
     }
 
-    protected function loadPublicRoutes(){
-        $publicRoutes = ModuleHelper::getPublicRoutes();
+    protected function loadApiRoutes(){
+        $publicRoutes = ModuleHelper::getPrivateRoutes();
         if ($publicRoutes){
             foreach ($publicRoutes as $key => $route) {
 
                 if (file_exists($route)){
                     Route::prefix('api')
-                        ->middleware('api')
-                        ->namespace($this->namespace)
+                        ->middleware(['apiHeader','api'])
+                        ->namespace($this->namespaceApi)
+                        ->group($route);
+                }
+            }
+        }
+    }
+
+    protected function loadWebRoutes(){
+        $publicRoutes = ModuleHelper::getPublicRoutes();
+        if ($publicRoutes){
+            foreach ($publicRoutes as $key => $route) {
+
+                if (file_exists($route)){
+                    Route::namespace($this->namespace)
+                        //->prefix('api')
+                        ->middleware('web')
+                        //->namespace($this->namespace)
                         ->group($route);
                 }
             }
