@@ -1,3 +1,3 @@
 <?php
 
-Route::post('/login', 'Auth\LoginController@logout');
+Route::post('/logout', 'Auth\LoginController@logout')->name('logout');
