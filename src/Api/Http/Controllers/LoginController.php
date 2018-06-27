@@ -25,7 +25,7 @@ class LoginController extends ApiController
     public function login(Request $request)
     {
         $validator = Validator::make($request->toArray(),[
-            'email' => 'required|string|email',
+            'userEmail' => 'required|string|email',
             'password' => 'required|string',
         ]);
         if (! $validator->passes()) {
@@ -33,17 +33,45 @@ class LoginController extends ApiController
             return $validator->errors()->jsonSerialize();
         }
 
-        $user = User::where('email',$request->input('email'))->first();
+        $user = User::where('email',$request->input('userEmail'))->first();
 
         if (!is_null($user)){
             $user->generateToken();
             return response()->json([
                 'status' => 'success',
-                'data' => $user->toArray(),
+                'data' => [
+                    'userId' => (integer)($user->toArray())['id'],
+                    'userUid' => (string)($user->toArray())['user_uid'],
+                    'apiToken' => (string)($user->toArray())['api_token'],
+                    'userImage' => (string)($user->toArray())['user_image'],
+                    'username' => (string)($user->toArray())['username'],
+                    'firstName' => (string)($user->toArray())['first_name'],
+                    'middleName' => (string)($user->toArray())['middle_name'],
+                    'LastName' => (string)($user->toArray())['last_name'],
+                    'countryCode' => (integer)($user->toArray())['country_code'],
+                    'mobileNumber' => (integer)($user->toArray())['mobile_number'],
+                    'userEmail' => (string)($user->toArray())['email'],
+                    'userVisibility' => (string)($user->toArray())['visibility'],
+                    'createdBy' => (string)($user->toArray())['created_by'],
+                    'lastLogin' => (string)($user->toArray())['last_log_in'],
+                    'userStatus' => (string)($user->toArray())['user_status'],
+                    'createdAt' => (string)($user->toArray())['created_at'],
+                    'updatedAt' => (string)($user->toArray())['updated_at'],
+                    'deletedAt' => (string)($user->toArray())['deleted_at'],
+                ],
+            ]);
+        }else{
+            return response()->json([
+               'status' => 'failed',
+                'data' => [
+                    "developerMessage"=> "The request was valid. However, the details provided did not match the stored records.",
+                    "httpStatusCode" => "400",
+                    "defaultUserMessage" => "User with the provided credential does not exist",
+                ],
+                'errors' => []
             ]);
         }
 
-        return $request->all();
     }
 
     /**
