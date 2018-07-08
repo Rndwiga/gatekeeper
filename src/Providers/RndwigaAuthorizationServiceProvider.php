@@ -5,6 +5,7 @@ namespace Rndwiga\Authentication\Providers;
 use Illuminate\Routing\Router;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Validator;
+
 use Illuminate\Support\ServiceProvider;
 use Rndwiga\Authentication\Api\Http\Middleware\ApiAuthenticationMiddleware;
 use Rndwiga\Authentication\Api\Http\Middleware\ApiHeaderMiddleware;

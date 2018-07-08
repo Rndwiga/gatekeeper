@@ -11,6 +11,7 @@ use Rndwiga\Authentication\Http\Controllers\Controller;
 use Rndwiga\Authentication\Models\EmailLogin;
 use Rndwiga\Authentication\Notifications\newUserLogin;
 
+
 class LoginController extends Controller
 {
     /*
@@ -47,7 +48,9 @@ class LoginController extends Controller
 
     private function loginType(){
 
-        if (!is_null(env('AUTHENTICATION_PASSWORD_LESS_LOGIN'))){
+        if (!is_null(env('AUTHENTICATION_USE_CUSTOM_LOGIN_CLASS_FOR_WEB')) && !empty(env('AUTHENTICATION_USE_CUSTOM_LOGIN_CLASS_FOR_WEB'))){
+            return env('AUTHENTICATION_USE_CUSTOM_LOGIN_VIEW');
+        }elseif (!is_null(env('AUTHENTICATION_PASSWORD_LESS_LOGIN'))){
             if (env('AUTHENTICATION_PASSWORD_LESS_LOGIN') == true){
                 return config('authorization.views.pages.auth.passwordless.login');
             }else{
@@ -125,30 +128,40 @@ class LoginController extends Controller
         }
     }
 
+    /** This is a complex class that allows for use of a custom login class that has to have at-least
+     * one public method bootstrapLogin() for login logic
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+
     public function resolvePasswordLessLogin(Request $request)
     {
-        $this->validate($request, ['email'=>'required|email|exists:users']);
+        if (!is_null(env('AUTHENTICATION_USE_CUSTOM_LOGIN_CLASS_FOR_WEB'))  && !empty(env('AUTHENTICATION_USE_CUSTOM_LOGIN_CLASS_FOR_WEB'))){
+            $customeClassPath = env('AUTHENTICATION_CUSTOM_LOGIN_CLASS_WEB');
+            return (new $customeClassPath($request->all()))->bootstrapLogin();
+        }else {
 
-        $emalLogin = EmailLogin::createForEmail($request->input('email'));
+            $this->validate($request, ['email' => 'required|email|exists:users']);
 
-        $url = route('auth.email.authentication',[  //building the url that we will send to the user.
-            'token' => $emalLogin->token
-        ]);
+            $emalLogin = EmailLogin::createForEmail($request->input('email'));
 
-        /*Mail::send('templates.email-login',['url' => $url], function ($m) use ($request){
-            $m->from('admin@staff.musoni.co.ke', 'Musoni Kenya');
-            $m->to($request->input('email'))->subject('Musoni Kenya Tracker Login');
-        });*/
+            $url = route('auth.email.authentication', [  //building the url that we will send to the user.
+                'token' => $emalLogin->token
+            ]);
 
-        $content = $url;
-        Mail::raw($content, function ($message)  use ($request){
-            $message->to($request->input('email'));
-            $message->subject(env('APP_NAME').' Login Token');
-            $message->from(env('MAIL_USERNAME'), env('APP_NAME'));
-        });
+            /*Mail::send('templates.email-login',['url' => $url], function ($m) use ($request){
+                $m->from('admin@staff.musoni.co.ke', 'Musoni Kenya');
+                $m->to($request->input('email'))->subject('Musoni Kenya Tracker Login');
+            });*/
 
-
-        return redirect()->back()->with('message',"Hi, we have sent login email to: {$request->input('email')}. Click the link there to login");
+            $content = $url;
+            Mail::raw($content, function ($message) use ($request) {
+                $message->to($request->input('email'));
+                $message->subject(env('APP_NAME') . ' Login Token');
+                $message->from(env('MAIL_USERNAME'), env('APP_NAME'));
+            });
+            return redirect()->back()->with('message',"Hi, we have sent login email to: {$request->input('email')}. Click the link there to login");
+        }
     }
 
     /**
