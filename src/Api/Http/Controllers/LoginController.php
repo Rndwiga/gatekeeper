@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Support\Facades\Validator;
 use Ramsey\Uuid\Uuid;
-use Rndwiga\Authentication\Api\Http\Requests\LoginRequest;
+use Rndwiga\Authentication\Api\Http\Requests\User\LoginUserRequest;
 use Rndwiga\Authentication\Http\Requests\UserRequest;
 use Rndwiga\Authentication\Http\Requests\UserRequestUpdate;
 use Rndwiga\Authentication\Models\Office;
@@ -22,16 +22,16 @@ class LoginController extends ApiController
      *
      * @return \Illuminate\Http\Response
      */
-    public function login(Request $request)
+    public function login(LoginUserRequest $request)
     {
-        $validator = Validator::make($request->toArray(),[
+        /*$validator = Validator::make($request->toArray(),[
             'userEmail' => 'required|string|email',
             'password' => 'required|string',
         ]);
         if (! $validator->passes()) {
             //TODO Handle your error
             return $validator->errors()->jsonSerialize();
-        }
+        }*/
 
         $user = User::where('email',$request->input('userEmail'))->first();
 
