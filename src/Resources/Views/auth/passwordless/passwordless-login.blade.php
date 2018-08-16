@@ -25,9 +25,11 @@
                         <div class="clearfix"></div>
 
                         <div class="separator">
+                            @if(env('AUTHENTICATION_ALLOW_REGISTRATION') == true)
                             <p class="change_link">New to site?
                                 <a href="{{ route('register') }}" class="to_register"> Create Account </a>
                             </p>
+                            @endif
 
                             <div class="clearfix"></div>
                             <br />

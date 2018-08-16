@@ -70,12 +70,6 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-        /*return Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ]);*/
-
         $envMessage = env('AUTHENTICATION_AUTHORIZATION_MESSAGE');
 
         $messages = [
@@ -83,8 +77,7 @@ class RegisterController extends Controller
         ];
         return Validator::make($data, [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|email_domain_allowed|unique:users',
-            //'password' => 'required|string|min:6|confirmed',
+            'email' => 'required|string|email|max:255|email_domain_allowed:'.$data['email'].'|unique:users',
         ],$messages);
 
     }
@@ -108,7 +101,7 @@ class RegisterController extends Controller
     {
       // return $request->all();
 
-       // $this->validator($request->all())->validate();
+        $this->validator($request->all())->validate();
 
         event(new Registered($user = $this->create($request->all())));
 
@@ -136,11 +129,6 @@ class RegisterController extends Controller
         $url = route('auth.email.authentication',[  //building the url that we will send to the user.
             'token' => $emalLogin->token
         ]);
-
-        /*Mail::send('templates.email-login',['url' => $url], function ($m) use ($request){
-            $m->from('admin@staff.musoni.co.ke', 'Musoni Kenya');
-            $m->to($request->input('email'))->subject('Musoni Kenya Tracker Login');
-        });*/
 
         $content = $url;
         Mail::raw($content, function ($message)  use ($request){

@@ -40,6 +40,7 @@ class RndwigaAuthorizationServiceProvider extends ServiceProvider
 
         Validator::extend('email_domain_allowed', function($attribute, $value) {
             $allowedEmailDomains =  ModuleHelper::getAllowedEmailDomains();
+           // $allowedEmailDomains =  ['musoni.co.ke'];
             return ends_with($value,
                 collect($allowedEmailDomains)
                     ->map(function($domain){
