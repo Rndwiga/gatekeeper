@@ -1,93 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="shortcut icon" href="{{asset('frontEnd/images/favicon.ico')}}" />
+@extends('layouts.app', ['class' => 'bg-default'])
 
-        <title>{{ config('app.name') }}</title>
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
-
-        <!-- Styles -->
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Raleway', sans-serif;
-                font-weight: 100;
-                height: 100vh;
-                margin: 0;
-            }
-
-            .full-height {
-                height: 100vh;
-            }
-
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
-
-            .position-ref {
-                position: relative;
-            }
-
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
-            .content {
-                text-align: center;
-            }
-
-            .title {
-                font-size: 84px;
-            }
-
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 12px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="flex-center position-ref full-height">
-            @if (Auth::guest())
-                <div class="top-right links">
-                    <a href="{{ url('/login') }}">Login</a>
-                </div>
-            @endif
-            @if(Auth::check())
-                <div class="top-right links">
-                    <a href="{{ url('/home') }}">Dashboard</a>
-                </div>
-            @endif
-            <div class="content">
-                <div class="title m-b-md">
-                <img src=" {{asset('frontEnd/images/musoni_logo.jpg')}} " alt="Musoni Mobile"style="width:90%;" />
-                    {{--Musoni Kenya--}}
-                </div>
-
-                <div class="links">
-                    <a href="https://musoni.co.ke" target="_blank">Website</a>
-                    <a href="https://www.youtube.com/channel/UCEzRhdReiuN_ptLlDKFfXOw" target="_blank">Youtube</a>
-                    <a href="https://twitter.com/MusoniKenya" target="_blank">Twitter</a>
+@section('content')
+    <div class="header bg-gradient-primary py-7 py-lg-8">
+        <div class="container">
+            <div class="header-body text-center mt-7 mb-7">
+                <div class="row justify-content-center">
+                    <div class="col-lg-5 col-md-6">
+                        <h1 class="text-white">{{ __('Welcome to Argon Dashboard FREE Laravel Live Preview.') }}</h1>
+                    </div>
                 </div>
             </div>
         </div>
-    </body>
-</html>
+        <div class="separator separator-bottom separator-skew zindex-100">
+            <svg x="0" y="0" viewBox="0 0 2560 100" preserveAspectRatio="none" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <polygon class="fill-default" points="2560 0 2560 100 0 100"></polygon>
+            </svg>
+        </div>
+    </div>
+
+    <div class="container mt--10 pb-5"></div>
+@endsection

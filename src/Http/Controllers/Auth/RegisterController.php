@@ -1,15 +1,16 @@
 <?php
 
-namespace Rndwiga\Authentication\Http\Controllers\Auth;
+namespace Rndwiga\Gatekeeper\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Foundation\Auth\RegistersUsers;
-use Rndwiga\Authentication\Models\EmailLogin;
-use Rndwiga\Authentication\Models\User;
+use Rndwiga\Gatekeeper\Model\EmailLogin;
 
 class RegisterController extends Controller
 {
@@ -57,8 +58,14 @@ class RegisterController extends Controller
         }
     }
 
+    /**
+     * Show the application registration form.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function showRegistrationForm()
     {
+        //return view('auth.register');
         return view($this->registrationType());
     }
 
@@ -71,16 +78,17 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         $envMessage = env('AUTHENTICATION_AUTHORIZATION_MESSAGE');
-
         $messages = [
             'email.email_domain_allowed' => isset($envMessage)? env('AUTHENTICATION_AUTHORIZATION_MESSAGE') : 'The :attribute should be the company email.', //setting custom message
         ];
-        return Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|email_domain_allowed:'.$data['email'].'|unique:users',
-        ],$messages);
 
+        return Validator::make($data, [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255','email_domain_allowed:'.$data['email'], 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'], //TODO:: check if method is set to passwordless to skip this validation
+        ],$messages);
     }
+
 
     /**
      * Create a new user instance after a valid registration.
@@ -93,30 +101,34 @@ class RegisterController extends Controller
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => bcrypt($data['email']),
+            'password' => Hash::make($data['password']),
         ]);
     }
 
+    /**
+     * Handle a registration request for the application.
+     * Introduced checker for passwordless
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+
     public function register(Request $request)
     {
-      // return $request->all();
-
         $this->validator($request->all())->validate();
 
         event(new Registered($user = $this->create($request->all())));
 
-        $this->guard()->logout();
+        if (env('AUTHENTICATION_PASSWORD_LESS_REGISTRATION') == true){
+            $this->guard()->logout();
+            $request->session()->invalidate();
 
-        $request->session()->invalidate();
+            return $this->resolvePasswordLessLogin($request);
+        }else{
+            $this->guard()->login($user);
 
-
-        //$this->guard()->login($user); //disabling automatic login
-
-        return $this->resolvePasswordLessLogin($request);
-
-       // $request->session()->flash('message', 'Registered successfully, enter your registered email to receive login link');
-
-       // return redirect()-> route('login');
+            return $this->registered($request, $user)
+                ?: redirect($this->redirectPath());
+        }
 
     }
 

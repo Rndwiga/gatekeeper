@@ -1,8 +1,11 @@
 <?php
 
-namespace Rndwiga\Authentication\Http\Requests;
+namespace Rndwiga\Gatekeeper\Http\Requests;
 
+
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Rndwiga\Gatekeeper\Model\AdministratorModel;
 
 class UserRequest extends FormRequest
 {
@@ -13,7 +16,7 @@ class UserRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return auth()->check();
     }
 
     /**
@@ -23,12 +26,16 @@ class UserRequest extends FormRequest
      */
     public function rules()
     {
-      return [
-          //'name' => 'required|max:255',
-          'email' => 'required|email|max:255|unique:users',
-          //'is_active' => 'required',
-          //'role_id' => 'required',
-         // 'office_id' => 'required',
-      ];
+        return [
+            'name' => [
+                'required', 'min:3'
+            ],
+            'email' => [
+                'required', 'email', Rule::unique((new AdministratorModel)->getTable())->ignore($this->route()->user->id ?? null)
+            ],
+            'password' => [
+                $this->route()->user ? 'nullable' : 'required', 'confirmed', 'min:6'
+            ]
+        ];
     }
 }

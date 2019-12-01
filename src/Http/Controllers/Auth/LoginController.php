@@ -1,16 +1,16 @@
 <?php
 
-namespace Rndwiga\Authentication\Http\Controllers\Auth;
+namespace Rndwiga\Gatekeeper\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-use Rndwiga\Authentication\Helpers\UserActivationLibrary;
-use Rndwiga\Authentication\Http\Controllers\Controller;
-use Rndwiga\Authentication\Models\EmailLogin;
-use Rndwiga\Authentication\Notifications\newUserLogin;
-
+use Illuminate\Support\Facades\Validator;
+use Rndwiga\Gatekeeper\Infrastructure\Services\UserActivationLibrary;
+use Rndwiga\Gatekeeper\Model\EmailLogin;
 
 class LoginController extends Controller
 {
@@ -32,8 +32,8 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
-    protected $userActivationLibrary;
+    protected $redirectTo = '/gatekeeper/dashboard';
+    protected  $userActivationLibrary;
 
     /**
      * Create a new controller instance.
@@ -46,6 +46,21 @@ class LoginController extends Controller
         $this->userActivationLibrary = $userActivationLibrary;
     }
 
+    /**
+     * Log the user out of the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function logout(Request $request)
+    {
+        $this->guard()->logout();
+
+        $request->session()->invalidate();
+
+        return $this->loggedOut($request) ?: redirect('/authentication/login');
+    }
+
     private function loginType(){
 
         if (!is_null(env('AUTHENTICATION_USE_CUSTOM_LOGIN_CLASS_FOR_WEB')) && !empty(env('AUTHENTICATION_USE_CUSTOM_LOGIN_CLASS_FOR_WEB'))){
@@ -55,10 +70,10 @@ class LoginController extends Controller
                 return config('authorization.views.pages.auth.passwordless.login');
             }else{
 
-                return config('gentella.views.pages.auth.login');
+                return config('gatekeeper.views.pages.auth.login');
             }
         }else{
-            return config('gentella.views.pages.auth.login');
+            return config('gatekeeper.views.pages.auth.login');
         }
     }
 
@@ -72,33 +87,14 @@ class LoginController extends Controller
         return view($this->loginType());
     }
 
-    public function authenticated(Request $request, $user)
-    {
-        if (!$user->activated) {
-            $this->userActivationLibrary->sendActivationMail($user);
-            auth()->logout();
-            return back()->with('activationWarning', true);
-        }
-        if ($user->is_active == 0) {
-            auth()->logout();
-            return redirect($this->redirectPath());
-        }
-        $this->newLogin($request->ip(), $user);
-        return back();
-    }
-    public function activateUser($token)
-    {
-        if ($user = $this->userActivationLibrary->activateUser($token)) {
-            auth()->login($user);
-            return redirect($this->redirectPath());
-        }
-        abort(404);
-    }
-    private function newLogin($ip, $user)
-    {
-        $user->notify(new newUserLogin($ip));
-    }
-
+    /**
+     * Handle a login request to the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function login(Request $request)
     {
         if($request->has('password')){
@@ -107,7 +103,8 @@ class LoginController extends Controller
             // If the class is using the ThrottlesLogins trait, we can automatically throttle
             // the login attempts for this application. We'll key this by the username and
             // the IP address of the client making these requests into this application.
-            if ($this->hasTooManyLoginAttempts($request)) {
+            if (method_exists($this, 'hasTooManyLoginAttempts') &&
+                $this->hasTooManyLoginAttempts($request)) {
                 $this->fireLockoutEvent($request);
 
                 return $this->sendLockoutResponse($request);
@@ -126,12 +123,14 @@ class LoginController extends Controller
         }else{
             return $this->resolvePasswordLessLogin($request);
         }
+
     }
 
     /** This is a complex class that allows for use of a custom login class that has to have at-least
      * one public method bootstrapLogin() for login logic
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Validation\ValidationException
      */
 
     public function resolvePasswordLessLogin(Request $request)
@@ -142,17 +141,13 @@ class LoginController extends Controller
         }else {
 
             $this->validate($request, ['email' => 'required|email|exists:users']);
+            $this->passwordLessValidator($request->all())->validate();
 
             $emalLogin = EmailLogin::createForEmail($request->input('email'));
 
             $url = route('auth.email.authentication', [  //building the url that we will send to the user.
                 'token' => $emalLogin->token
             ]);
-
-            /*Mail::send('templates.email-login',['url' => $url], function ($m) use ($request){
-                $m->from('admin@staff.musoni.co.ke', 'Musoni Kenya');
-                $m->to($request->input('email'))->subject('Musoni Kenya Tracker Login');
-            });*/
 
             $content = $url;
             Mail::raw($content, function ($message) use ($request) {
@@ -165,17 +160,40 @@ class LoginController extends Controller
     }
 
     /**
+     * Get a validator for an incoming registration request.
+     *
+     * @param  array  $data
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    protected function passwordLessValidator(array $data)
+    {
+        $envMessage = env('AUTHENTICATION_AUTHORIZATION_MESSAGE');
+
+        $messages = [
+            'email.email_domain_allowed' => isset($envMessage)? env('AUTHENTICATION_AUTHORIZATION_MESSAGE') : 'The :attribute should be the company email.', //setting custom message
+        ];
+        return Validator::make($data, [
+            'email' => 'required|string|email|max:255|email_domain_allowed:'.$data['email'].'|exists:users',
+        ],$messages);
+
+    }
+
+    /**
      * This function authenticates a user using email token
      * @param $token
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
 
-    public function authenticateEmail($token){
+    public function authenticateEmail(Request $request,$token){
         $emailLogin = EmailLogin::validateFromToken($token);
 
         Auth::login($emailLogin->user);
 
+        $emailLogin->user->update([
+            'last_login_at' => Carbon::now()->toDateTimeString(),
+            'last_login_ip' => $request->getClientIp()
+        ]);
+
         return redirect()->route(env('BASE_DASHBOARD_ROUTE'));
     }
-
 }

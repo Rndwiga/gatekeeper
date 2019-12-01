@@ -17,6 +17,7 @@ class CreateUsersTable extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
             $table->string('user_uid', 36)->unique();
+            $table->string('api_token', 60)->unique()->nullable();
             $table->string('api_key',60)->nullable()->unique();
             $table->string('user_image')->nullable();
             $table->string('username')->nullable();
@@ -26,6 +27,7 @@ class CreateUsersTable extends Migration
             $table->string('country_code', 4)->nullable();
             $table->string('mobile_number')->nullable();
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('visibility')->default('hidden');
             $table->string('created_by')->nullable();
             $table->dateTime('last_log_in')->nullable();

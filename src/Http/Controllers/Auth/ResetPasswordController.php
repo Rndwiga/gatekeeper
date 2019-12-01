@@ -1,8 +1,9 @@
 <?php
 
-namespace Rndwiga\Authentication\Http\Controllers\Auth;
+namespace Rndwiga\Gatekeeper\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Rndwiga\Gatekeeper\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 
 class ResetPasswordController extends Controller
@@ -28,12 +29,18 @@ class ResetPasswordController extends Controller
     protected $redirectTo = '/home';
 
     /**
-     * Create a new controller instance.
+     * Display the password reset view for the given token.
      *
-     * @return void
+     * If no token is present, display the link request form.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string|null  $token
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function __construct()
+    public function showResetForm(Request $request, $token = null)
     {
-        $this->middleware('guest');
+        return view('auth.passwords.reset')->with(
+            ['token' => $token, 'email' => $request->email]
+        );
     }
 }

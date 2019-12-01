@@ -1,8 +1,8 @@
 <?php
 
-namespace Rndwiga\Authentication\Http\Controllers\Auth;
+namespace Rndwiga\Gatekeeper\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
+use Rndwiga\Gatekeeper\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 
 class ForgotPasswordController extends Controller
@@ -21,12 +21,12 @@ class ForgotPasswordController extends Controller
     use SendsPasswordResetEmails;
 
     /**
-     * Create a new controller instance.
+     * Display the form to request a password reset link.
      *
-     * @return void
+     * @return \Illuminate\Http\Response
      */
-    public function __construct()
+    public function showLinkRequestForm()
     {
-        $this->middleware('guest');
+        return view('auth.passwords.email');
     }
 }
